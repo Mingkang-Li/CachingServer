@@ -3,6 +3,7 @@ package check_on_use
 import (
 	"CachingServer/pb"
 	"context"
+	"fmt"
 	id "github.com/google/uuid"
 )
 
@@ -16,6 +17,7 @@ func NewServer() *Check_on_use_server {
 }
 
 func (s *Check_on_use_server) IsUpToDate(context context.Context, request *pb.CheckFileRequest) (*pb.CheckFileResponse, error) {
+	fmt.Println("Received a request!")
 	uuid, ok := s.AllFiles[request.FileName]
 	if !ok {
 		return &pb.CheckFileResponse{IsNewest: true}, nil

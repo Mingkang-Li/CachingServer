@@ -52,6 +52,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println("Server is up and running")
 	err = grpcServer.Serve(listen)
 	if err != nil {
 		return
