@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	rootDir       string        = "../client_files/"
+	rootDir       string        = "./client_files/"
 	checkInterval time.Duration = 5
 )
 
@@ -51,7 +51,7 @@ func updateFileTable(conn pb.CheckOnUseServerClient) {
 
 		// Update file if it is not up-to-date
 		if !res.IsNewest {
-			fmt.Println("Version is not newest for file", f)
+			fmt.Println("Updated file", f)
 			res, err := conn.PullFile(context.Background(), &pb.PullFileRequest{FileName: f})
 			if err != nil {
 				fmt.Println(err)
