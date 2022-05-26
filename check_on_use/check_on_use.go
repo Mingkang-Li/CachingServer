@@ -10,11 +10,15 @@ import (
 
 type Check_on_use_server struct {
 	pb.UnimplementedCheckOnUseServerServer
+	RootDir  string
 	AllFiles map[string]string
 }
 
-func NewServer() *Check_on_use_server {
-	return &Check_on_use_server{AllFiles: make(map[string]string)}
+func NewServer(rootDir string) *Check_on_use_server {
+	return &Check_on_use_server{
+		RootDir:  rootDir,
+		AllFiles: make(map[string]string),
+	}
 }
 
 func (s *Check_on_use_server) IsUpToDate(context context.Context, request *pb.CheckFileRequest) (*pb.CheckFileResponse, error) {
@@ -32,7 +36,7 @@ func (s *Check_on_use_server) IsUpToDate(context context.Context, request *pb.Ch
 func (s *Check_on_use_server) PullFile(context context.Context, request *pb.PullFileRequest) (*pb.PullFileResponse, error) {
 
 	// Make sure that the file exists
-	_, err := os.Stat(request.FileName)
+	_, err := os.Stat(s.RootDir + request.FileName)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +48,7 @@ func (s *Check_on_use_server) PullFile(context context.Context, request *pb.Pull
 	}
 
 	// Load the file to memory
-	fd, _ := os.Open(request.FileName)
+	fd, _ := os.Open(s.RootDir + request.FileName)
 	data, err := io.ReadAll(fd)
 	if err != nil {
 		return nil, err

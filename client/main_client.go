@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	rootDir       string        = "./files/"
+	rootDir       string        = "../client_files/"
 	checkInterval time.Duration = 5
 )
 
@@ -57,13 +57,17 @@ func updateFileTable(conn pb.CheckOnUseServerClient) {
 				fmt.Println(err)
 				continue
 			}
-			dstFd, err := os.OpenFile(rootDir+f, os.O_RDWR, 0644)
+			_ = os.Remove(rootDir + f)
+			dstFd, err := os.OpenFile(rootDir+f, os.O_RDWR|os.O_CREATE, 0644)
+
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
 			srcFd := bytes.NewReader(res.Data)
+
 			io.Copy(dstFd, srcFd)
+			dstFd.Close()
 		}
 	}
 }
@@ -71,16 +75,16 @@ func updateFileTable(conn pb.CheckOnUseServerClient) {
 func main() {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-
 	conn, err := grpc.Dial("localhost:15213", opts...)
 	if err != nil {
 		log.Fatalf("fail to dial: %v", err)
 	}
 	defer conn.Close()
-	client := pb.NewCheckOnUseServerClient(conn)
 
+	client := pb.NewCheckOnUseServerClient(conn)
 	go update(client)
 
+	// Never exit the main program
 	wg.Add(1)
 	wg.Wait()
 

@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	rootDir       string        = "./files/"
+	rootDir       string        = "../server_files/"
 	checkInterval time.Duration = 5
 )
 
@@ -49,7 +49,7 @@ func updateFileTable(srv *check_on_use.Check_on_use_server) {
 
 func main() {
 	grpcServer := grpc.NewServer()
-	srv := check_on_use.NewServer()
+	srv := check_on_use.NewServer(rootDir)
 	pb.RegisterCheckOnUseServerServer(grpcServer, srv)
 	listen, err := net.Listen("tcp", ":15213")
 	if err != nil {
