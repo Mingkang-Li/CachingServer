@@ -1,0 +1,26 @@
+syntax = "proto3";
+option go_package = "./pb";
+
+message CheckFileRequest {
+  string file_name = 1;
+  string version_number = 2;
+}
+
+message CheckFileResponse {
+  bool is_newest = 1;
+}
+
+message PullFileRequest {
+  string file_name = 1;
+}
+
+message PullFileResponse {
+  string file_name = 1;
+  string version_number = 2;
+  repeated bytes data = 3;
+}
+
+service CheckOnUseServer {
+  rpc isUpToDate(CheckFileRequest) returns (CheckFileResponse) {}
+  rpc pullFile(PullFileRequest) returns (PullFileResponse) {}
+}
