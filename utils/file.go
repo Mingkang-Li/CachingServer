@@ -7,7 +7,8 @@ import (
 	"os"
 )
 
-func md5sum(filePath string) (string, error) {
+// Md5sum Computes the md5Sum of a file
+func Md5sum(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", err

@@ -17,7 +17,7 @@ message PullFileRequest {
 message PullFileResponse {
   string file_name = 1;
   string version_number = 2;
-  repeated bytes data = 3;
+  bytes data = 3;
 }
 
 service CheckOnUseServer {

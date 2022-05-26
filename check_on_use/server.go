@@ -4,33 +4,55 @@ import (
 	"CachingServer/pb"
 	"context"
 	"fmt"
-	id "github.com/google/uuid"
+	"io"
+	"os"
 )
 
 type Check_on_use_server struct {
 	pb.UnimplementedCheckOnUseServerServer
-	AllFiles map[string]id.UUID
+	AllFiles map[string]string
 }
 
 func NewServer() *Check_on_use_server {
-	return &Check_on_use_server{AllFiles: make(map[string]id.UUID)}
+	return &Check_on_use_server{AllFiles: make(map[string]string)}
 }
 
 func (s *Check_on_use_server) IsUpToDate(context context.Context, request *pb.CheckFileRequest) (*pb.CheckFileResponse, error) {
-	fmt.Println("Received a request!")
-	uuid, ok := s.AllFiles[request.FileName]
+	// fmt.Println("Received a request!")
+	checksum, ok := s.AllFiles[request.FileName]
 	if !ok {
 		return &pb.CheckFileResponse{IsNewest: true}, nil
 	}
 
-	isNewest := uuid.String() == request.VersionNumber
+	isNewest := checksum == request.VersionNumber
 	return &pb.CheckFileResponse{IsNewest: isNewest}, nil
 }
 
 func (s *Check_on_use_server) PullFile(context context.Context, request *pb.PullFileRequest) (*pb.PullFileResponse, error) {
+
+	// Make sure that the file exists
+	_, err := os.Stat(request.FileName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Make sure that the file is in the in-memory map
+	checksum, ok := s.AllFiles[request.FileName]
+	if !ok {
+		return nil, fmt.Errorf("ENOENT")
+	}
+
+	// Load the file to memory
+	fd, _ := os.Open(request.FileName)
+	data, err := io.ReadAll(fd)
+	if err != nil {
+		return nil, err
+	}
+
+	// Send the response
 	return &pb.PullFileResponse{
-		FileName:      "NOTIMPLEMENTED",
-		VersionNumber: "0",
-		Data:          nil,
+		FileName:      request.FileName,
+		VersionNumber: checksum,
+		Data:          data,
 	}, nil
 }
